@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>發票詳情 - 發票與記帳管理系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #0891b2;
+            --success: #059669;
+            --danger: #dc2626;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .detail-container {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .detail-section {
+            margin-bottom: 35px;
+        }
+
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .detail-value.amount {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-unpaid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-void {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-secondary {
+            background: var(--text-gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-dark);
+        }
+
+        /* =========================
+           響應式設計 (RWD)
+           ========================= */
+
+        /* 平板 (< 1024px) */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        /* 手機橫向 (< 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .header-actions button,
+            .header-actions a {
+                flex: 1;
+                min-width: 140px;
+            }
+
+            .detail-container {
+                padding: 24px;
+            }
+
+            .detail-section-title {
+                font-size: 1.1rem;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .detail-label {
+                font-size: 0.85rem;
+            }
+
+            .detail-value {
+                font-size: 0.95rem;
+            }
+
+            .detail-value.amount {
+                font-size: 1.1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        /* 手機直向 (< 576px) */
+        @media (max-width: 576px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .header {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .header-actions button,
+            .header-actions a {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .detail-container {
+                padding: 20px;
+            }
+
+            .detail-section {
+                margin-bottom: 28px;
+            }
+
+            .detail-section-title {
+                font-size: 1rem;
+                margin-bottom: 16px;
+            }
+
+            .detail-grid {
+                gap: 14px;
+            }
+
+            .detail-label {
+                font-size: 0.8rem;
+            }
+
+            .detail-value {
+                font-size: 0.9rem;
+            }
+
+            .detail-value.amount {
+                font-size: 1rem;
+            }
+
+            .status-badge {
+                padding: 5px 14px;
+                font-size: 0.85rem;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 0.95rem;
+            }
+
+            .action-buttons {
+                margin-top: 24px;
+                padding-top: 24px;
+                gap: 10px;
+            }
+        }
+
+        /* 極小螢幕 (< 375px) */
+        @media (max-width: 375px) {
+            body {
+                padding: 10px 8px;
+            }
+
+            .header {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .detail-container {
+                padding: 16px;
+            }
+
+            .detail-section-title {
+                font-size: 0.95rem;
+            }
+
+            .detail-label {
+                font-size: 0.75rem;
+            }
+
+            .detail-value {
+                font-size: 0.85rem;
+            }
+
+            .detail-value.amount {
+                font-size: 0.95rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 發票詳情</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="editBtn">✏️ 編輯</button>
+                <button class="btn btn-danger" id="deleteBtn">🗑️ 刪除</button>
+                <a href="invoices.html" class="btn btn-secondary">返回列表</a>
+            </div>
+        </div>
+
+        <div class="detail-container" id="detailContainer">
+            <p style="text-align: center; color: var(--text-gray); padding: 40px 0;">載入中...</p>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        let currentInvoice = null;
+
+        // 從 URL 獲取發票 ID
+        function getInvoiceId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // 頁面載入時獲取發票詳情
+        document.addEventListener('DOMContentLoaded', async () => {
+            const invoiceId = getInvoiceId();
+            
+            if (!invoiceId) {
+                document.getElementById('detailContainer').innerHTML = `
+                    <p style="text-align: center; color: var(--danger); padding: 40px 0;">
+                        ❌ 未指定發票 ID<br><br>
+                        <a href="invoices.html" class="btn btn-primary">返回列表</a>
+                    </p>
+                `;
+                return;
+            }
+
+            await loadInvoiceDetail(invoiceId);
+        });
+
+        // 載入發票詳情
+        async function loadInvoiceDetail(invoiceId) {
+            showLoading('載入發票詳情中...');
+            try {
+                currentInvoice = await apiRequest('getInvoice', { id: invoiceId });
+                
+                if (!currentInvoice) {
+                    throw new Error('發票不存在');
+                }
+
+                displayInvoiceDetail(currentInvoice);
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                document.getElementById('detailContainer').innerHTML = `
+                    <p style="text-align: center; color: var(--danger); padding: 40px 0;">
+                        ❌ ${error.message}<br><br>
+                        <a href="invoices.html" class="btn btn-primary">返回列表</a>
+                    </p>
+                `;
+            }
+        }
+
+        // 顯示發票詳情
+        function displayInvoiceDetail(invoice) {
+            const statusClass = 
+                invoice.status === '已結清' ? 'status-paid' :
+                invoice.status === '作廢' ? 'status-void' : 'status-unpaid';
+
+            document.getElementById('detailContainer').innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-section-title">📝 基本資訊</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">發票號碼</div>
+                            <div class="detail-value">${invoice.invoiceNumber}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">發票日期</div>
+                            <div class="detail-value">${invoice.invoiceDate}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">狀態</div>
+                            <div class="detail-value">
+                                <span class="status-badge ${statusClass}">${invoice.status || '未結清'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title">👤 客戶資訊</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">客戶名稱</div>
+                            <div class="detail-value">${invoice.clientName}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">統一編號</div>
+                            <div class="detail-value">${invoice.taxId || '未填寫'}</div>
+                        </div>
+                        <div class="detail-item full-width">
+                            <div class="detail-label">聯絡電話</div>
+                            <div class="detail-value">${invoice.phone || '未填寫'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title">💼 專案資訊</div>
+                    <div class="detail-grid">
+                        <div class="detail-item full-width">
+                            <div class="detail-label">工程名稱</div>
+                            <div class="detail-value">${invoice.projectName}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title">💰 金額資訊</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">小計金額（不含稅）</div>
+                            <div class="detail-value amount">${formatCurrency(invoice.subtotal)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">稅金（5%）</div>
+                            <div class="detail-value amount">${formatCurrency(invoice.tax)}</div>
+                        </div>
+                        <div class="detail-item full-width">
+                            <div class="detail-label">總計金額</div>
+                            <div class="detail-value amount" style="font-size: 1.5rem;">${formatCurrency(invoice.total)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 編輯按鈕
+        document.getElementById('editBtn').addEventListener('click', () => {
+            if (currentInvoice) {
+                window.location.href = `invoice-edit.html?id=${currentInvoice.id}`;
+            }
+        });
+
+        // 刪除按鈕
+        document.getElementById('deleteBtn').addEventListener('click', async () => {
+            if (!currentInvoice) return;
+
+            if (!showConfirm('確定要刪除這張發票嗎？此操作無法復原。')) {
+                return;
+            }
+
+            showLoading('刪除發票中...');
+            try {
+                await apiRequest('deleteInvoice', { id: currentInvoice.id });
+                hideLoading();
+                showToast('發票已刪除', 'success');
+                setTimeout(() => {
+                    window.location.href = 'invoices.html';
+                }, 1000);
+            } catch (error) {
+                hideLoading();
+                showToast('刪除失敗: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

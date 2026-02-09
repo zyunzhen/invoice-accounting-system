@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儀表板 - 發票與記帳管理系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --orange: #f97316;
+            --purple: #a855f7;
+            --blue: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --text-light: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-secondary {
+            background: var(--orange);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #ea580c;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .stat-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--stat-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: gap 0.2s ease;
+        }
+
+        .stat-link:hover {
+            gap: 8px;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: var(--icon-bg);
+            flex-shrink: 0;
+        }
+
+        /* Different colors for each stat */
+        .stat-card.invoices {
+            --stat-color: #4f46e5;
+            --icon-bg: #e0e7ff;
+        }
+
+        .stat-card.pending {
+            --stat-color: #f97316;
+            --icon-bg: #ffedd5;
+        }
+
+        .stat-card.transactions {
+            --stat-color: #a855f7;
+            --icon-bg: #f3e8ff;
+        }
+
+        .stat-card.balance {
+            --stat-color: #3b82f6;
+            --icon-bg: #dbeafe;
+        }
+
+        /* Tables Section */
+        .tables-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .table-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .view-all {
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .view-all:hover {
+            color: var(--primary-light);
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-gray);
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        .data-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .data-table td {
+            padding: 16px 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            vertical-align: middle;
+            height: 60px;
+        }
+
+        .amount {
+            font-weight: 600;
+        }
+
+        .amount.positive {
+            color: var(--success);
+        }
+
+        .amount.negative {
+            color: var(--danger);
+        }
+
+        .amount.neutral {
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-badge.unpaid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.void {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.income {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.expense {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-gray);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .tables-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 6px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+        .table-card {
+            animation: fadeInUp 0.5s ease backwards;
+            animation-delay: 0.25s;
+        }
+
+        /* =========================
+           響應式設計 (RWD)
+           ========================= */
+        
+        /* 平板尺寸 (768px - 1024px) */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                padding: 0 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tables-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 手機橫向 (576px - 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-title p {
+                font-size: 0.85rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 1.75rem;
+            }
+
+            .table-card {
+                padding: 20px;
+            }
+
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 12px 6px;
+            }
+        }
+
+        /* 手機直向 (< 576px) */
+        @media (max-width: 576px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .dashboard-header {
+                padding: 15px 0;
+            }
+
+            .header-title h1 {
+                font-size: 1.3rem;
+            }
+
+            .stat-card {
+                padding: 18px;
+            }
+
+            .stat-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.3rem;
+            }
+
+            .table-card {
+                padding: 16px;
+            }
+
+            .table-title {
+                font-size: 1rem;
+            }
+
+            .data-table {
+                font-size: 0.8rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 4px;
+                height: 55px;
+            }
+
+            /* 狀態 badge 縮小 */
+            .status-badge {
+                padding: 4px 12px;
+                font-size: 0.75rem;
+            }
+
+            /* 金額文字縮小 */
+            .amount {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* 極小螢幕 (< 375px) */
+        @media (max-width: 375px) {
+            .header-title h1 {
+                font-size: 1.2rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                font-size: 0.75rem;
+                padding: 8px 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-title">
+                <h1>儀表板</h1>
+                <p>實時查看系統數據與統計資訊</p>
+            </div>
+            <div class="header-actions">
+                <a href="invoices.html" class="btn btn-primary">發票管理</a>
+                <a href="accounting.html" class="btn btn-secondary">記帳管理</a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card invoices">
+                <div class="stat-content">
+                    <div class="stat-title">發票總數</div>
+                    <div class="stat-value" id="totalInvoices">0</div>
+                    <a href="invoices.html" class="stat-link">
+                        查看詳情 <span>»</span>
+                    </a>
+                </div>
+                <div class="stat-icon">📄</div>
+            </div>
+
+            <div class="stat-card pending">
+                <div class="stat-content">
+                    <div class="stat-title">待付款發票</div>
+                    <div class="stat-value" id="pendingInvoices">0</div>
+                    <a href="invoices.html" class="stat-link">
+                        及時催款 <span>»</span>
+                    </a>
+                </div>
+                <div class="stat-icon">⏰</div>
+            </div>
+
+            <div class="stat-card transactions">
+                <div class="stat-content">
+                    <div class="stat-title">記帳總數</div>
+                    <div class="stat-value" id="totalTransactions">0</div>
+                    <a href="accounting.html" class="stat-link">
+                        查看詳情 <span>»</span>
+                    </a>
+                </div>
+                <div class="stat-icon">💳</div>
+            </div>
+
+            <div class="stat-card balance">
+                <div class="stat-content">
+                    <div class="stat-title">當前餘額</div>
+                    <div class="stat-value" id="currentBalance">NT$ 0</div>
+                    <a href="accounting.html" class="stat-link">
+                        跟進進度 <span>»</span>
+                    </a>
+                </div>
+                <div class="stat-icon">💎</div>
+            </div>
+        </div>
+
+        <!-- Tables Section -->
+        <div class="tables-section">
+            <!-- Recent Invoices -->
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title">最近發票</div>
+                    <a href="invoices.html" class="view-all">查看全部</a>
+                </div>
+                <div id="invoicesTableContainer">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>載入中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title">最近記帳</div>
+                    <a href="accounting.html" class="view-all">查看全部</a>
+                </div>
+                <div id="transactionsTableContainer">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>載入中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadDashboardData();
+        });
+
+        // 載入儀表板數據
+        async function loadDashboardData() {
+            try {
+                showLoading('載入儀表板數據中...');
+
+                // 並行載入所有數據
+                const [invoices, transactions] = await Promise.all([
+                    apiRequest('getInvoices'),
+                    apiRequest('getTransactions')
+                ]);
+
+                // 更新統計卡片
+                updateStatCards(invoices, transactions);
+
+                // 更新表格
+                updateInvoicesTable(invoices);
+                updateTransactionsTable(transactions);
+
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showToast('載入儀表板失敗: ' + error.message, 'error');
+                console.error('載入錯誤:', error);
+            }
+        }
+
+        // 更新統計卡片
+        function updateStatCards(invoices, transactions) {
+            // 發票統計
+            const totalInvoices = invoices.length;
+            const pendingInvoices = invoices.filter(inv => inv.status === '未結清').length;
+
+            document.getElementById('totalInvoices').textContent = totalInvoices;
+            document.getElementById('pendingInvoices').textContent = pendingInvoices;
+
+            // 交易統計
+            const totalTransactions = transactions.length;
+            
+            let totalIncome = 0;
+            let totalExpense = 0;
+            
+            transactions.forEach(t => {
+                if (t.type === '收入') {
+                    totalIncome += parseFloat(t.amount || 0);
+                } else if (t.type === '支出') {
+                    totalExpense += parseFloat(t.amount || 0);
+                }
+            });
+
+            const balance = totalIncome - totalExpense;
+
+            document.getElementById('totalTransactions').textContent = totalTransactions;
+            document.getElementById('currentBalance').textContent = formatCurrency(balance);
+        }
+
+        // 更新發票表格
+        function updateInvoicesTable(invoices) {
+            const container = document.getElementById('invoicesTableContainer');
+
+            if (!invoices || invoices.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>暫無發票數據</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 排序：最新日期在最上方，日期相同時發票號碼大的在上
+            const sortedInvoices = [...invoices].sort((a, b) => {
+                const dateA = new Date(a.invoiceDate);
+                const dateB = new Date(b.invoiceDate);
+                
+                // 先比較日期
+                if (dateB.getTime() !== dateA.getTime()) {
+                    return dateB - dateA;
+                }
+                
+                // 日期相同時，比較發票號碼（提取數字部分）
+                const numA = parseInt(a.invoiceNumber.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.invoiceNumber.replace(/\D/g, '')) || 0;
+                
+                if (numA !== numB) {
+                    return numB - numA; // 數字大的在上面
+                }
+                
+                return b.invoiceNumber.localeCompare(a.invoiceNumber);
+            });
+
+            const recentInvoices = sortedInvoices.slice(0, 15);
+
+            const tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>客戶</th>
+                            <th>金額</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentInvoices.map(invoice => {
+                            const statusClass = 
+                                invoice.status === '已結清' ? 'paid' :
+                                invoice.status === '作廢' ? 'void' : 'unpaid';
+                            
+                            return `
+                                <tr>
+                                    <td>${invoice.invoiceDate}</td>
+                                    <td>${invoice.clientName}</td>
+                                    <td class="amount neutral">${formatCurrency(invoice.total)}</td>
+                                    <td>
+                                        <span class="status-badge ${statusClass}">${invoice.status || '未結清'}</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        // 更新交易表格
+        function updateTransactionsTable(transactions) {
+            const container = document.getElementById('transactionsTableContainer');
+
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💰</div>
+                        <p>暫無交易數據</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 排序：最新的在最上方
+            const sortedTransactions = [...transactions].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            const recentTransactions = sortedTransactions.slice(0, 15);
+
+            const tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>名稱</th>
+                            <th>金額</th>
+                            <th>類型</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentTransactions.map((transaction, index) => {
+                            const isIncome = transaction.type === '收入';
+                            const amountClass = isIncome ? 'positive' : 'negative';
+                            const statusClass = isIncome ? 'income' : 'expense';
+                            const amountPrefix = isIncome ? '+' : '-';
+
+                            return `
+                                <tr>
+                                    <td>${transaction.date}</td>
+                                    <td>${transaction.note}</td>
+                                    <td class="amount ${amountClass}">${amountPrefix} ${formatCurrency(transaction.amount)}</td>
+                                    <td><span class="status-badge ${statusClass}">${transaction.type}</span></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+    </script>
+
+</body>
+</html>

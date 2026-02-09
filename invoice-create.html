@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增發票 - 發票與記帳管理系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #0891b2;
+            --success: #059669;
+            --danger: #dc2626;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .form-container {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .calculated-field {
+            background: var(--bg-light);
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--text-gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-dark);
+        }
+
+        /* =========================
+           響應式設計 (RWD)
+           ========================= */
+
+        /* 平板 (< 1024px) */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        /* 手機橫向 (< 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+
+            .header-actions button,
+            .header-actions a {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .form-section-title {
+                font-size: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 0.9rem;
+                padding: 10px 14px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions button,
+            .form-actions a {
+                width: 100%;
+            }
+        }
+
+        /* 手機直向 (< 576px) */
+        @media (max-width: 576px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .form-container {
+                padding: 16px;
+            }
+
+            .form-section {
+                margin-bottom: 24px;
+            }
+
+            .form-section-title {
+                font-size: 0.95rem;
+                margin-bottom: 12px;
+            }
+
+            .form-group {
+                margin-bottom: 14px;
+            }
+
+            .form-group label {
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 極小螢幕 (< 375px) */
+        @media (max-width: 375px) {
+            body {
+                padding: 10px 8px;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .form-container {
+                padding: 12px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 0.8rem;
+            }
+
+            .btn {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>➕ 新增發票</h1>
+            <div class="header-actions" style="display: flex; gap: 10px;">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('invoiceForm').requestSubmit()">
+                    💾 儲存發票
+                </button>
+                <a href="invoices.html" class="btn btn-secondary">返回列表</a>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="invoiceForm">
+                <div class="form-section">
+                    <div class="form-section-title">📝 基本資訊</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>發票號碼 <span class="required">*</span></label>
+                            <input type="text" id="invoiceNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label>發票日期 <span class="required">*</span></label>
+                            <input type="date" id="invoiceDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>狀態</label>
+                            <select id="status">
+                                <option value="未結清">未結清</option>
+                                <option value="已結清">已結清</option>
+                                <option value="作廢">作廢</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">👤 客戶資訊</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>客戶名稱 <span class="required">*</span></label>
+                            <select id="clientSelect" onchange="onClientChange()">
+                                <option value="">-- 選擇客戶或輸入新客戶 --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>或輸入新客戶</label>
+                            <input type="text" id="clientName" placeholder="輸入新客戶名稱">
+                        </div>
+                        <div class="form-group">
+                            <label>統一編號</label>
+                            <input type="text" id="taxId">
+                        </div>
+                        <div class="form-group">
+                            <label>聯絡電話</label>
+                            <input type="tel" id="phone">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>地址</label>
+                            <input type="text" id="address">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">💼 專案資訊</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>工程名稱 <span class="required">*</span></label>
+                            <input type="text" id="projectName" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">💰 金額資訊</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>計算方式</label>
+                            <select id="calculationMode" onchange="onCalculationModeChange()">
+                                <option value="subtotal">從小計計算（不含稅）</option>
+                                <option value="total">從總計計算（含稅）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <!-- 空白佔位 -->
+                        </div>
+                        <div class="form-group" id="subtotalGroup">
+                            <label>小計金額（不含稅）<span class="required">*</span></label>
+                            <input type="number" id="subtotal" min="0" step="1">
+                        </div>
+                        <div class="form-group" id="totalGroup" style="display: none;">
+                            <label>總計金額（含稅）<span class="required">*</span></label>
+                            <input type="number" id="totalInput" min="0" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>稅金（5%）</label>
+                            <div class="calculated-field" id="taxDisplay">NT$ 0</div>
+                        </div>
+                        <div class="form-group" id="subtotalDisplayGroup" style="display: none;">
+                            <label>小計金額（不含稅）</label>
+                            <div class="calculated-field" id="subtotalDisplay">NT$ 0</div>
+                        </div>
+                        <div class="form-group" id="totalDisplayGroup">
+                            <label>總計金額</label>
+                            <div class="calculated-field" id="totalDisplay">NT$ 0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">儲存發票</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='invoices.html'">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        let allClients = [];
+        
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 設定今天的日期為預設值
+            document.getElementById('invoiceDate').valueAsDate = new Date();
+            
+            // 載入客戶列表
+            await loadClients();
+        });
+
+        // 載入客戶列表
+        async function loadClients() {
+            try {
+                allClients = await apiRequest('getClients');
+                const clientSelect = document.getElementById('clientSelect');
+                
+                // 填充下拉選單
+                allClients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = client.name;
+                    option.dataset.taxId = client.taxId || '';
+                    option.dataset.phone = client.phone || '';
+                    option.dataset.address = client.address || '';
+                    clientSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('載入客戶失敗:', error);
+            }
+        }
+
+        // 客戶選擇變更
+        function onClientChange() {
+            const clientSelect = document.getElementById('clientSelect');
+            const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+            
+            if (selectedOption.value) {
+                // 自動填入客戶資訊
+                document.getElementById('clientName').value = selectedOption.textContent;
+                document.getElementById('taxId').value = selectedOption.dataset.taxId || '';
+                document.getElementById('phone').value = selectedOption.dataset.phone || '';
+                document.getElementById('address').value = selectedOption.dataset.address || '';
+            }
+        }
+
+        // 計算模式變更
+        function onCalculationModeChange() {
+            const mode = document.getElementById('calculationMode').value;
+            const subtotalGroup = document.getElementById('subtotalGroup');
+            const totalGroup = document.getElementById('totalGroup');
+            const subtotalDisplayGroup = document.getElementById('subtotalDisplayGroup');
+            const totalDisplayGroup = document.getElementById('totalDisplayGroup');
+            
+            if (mode === 'subtotal') {
+                // 從小計計算
+                subtotalGroup.style.display = 'flex';
+                totalGroup.style.display = 'none';
+                subtotalDisplayGroup.style.display = 'none';
+                totalDisplayGroup.style.display = 'flex';
+                
+                // 清空總計輸入
+                document.getElementById('totalInput').value = '';
+            } else {
+                // 從總計計算
+                subtotalGroup.style.display = 'none';
+                totalGroup.style.display = 'flex';
+                subtotalDisplayGroup.style.display = 'flex';
+                totalDisplayGroup.style.display = 'none';
+                
+                // 清空小計輸入
+                document.getElementById('subtotal').value = '';
+            }
+            
+            // 清空顯示
+            document.getElementById('taxDisplay').textContent = 'NT$ 0';
+            document.getElementById('totalDisplay').textContent = 'NT$ 0';
+            document.getElementById('subtotalDisplay').textContent = 'NT$ 0';
+        }
+
+        // 監聽小計金額變化（從小計計算總計）
+        document.getElementById('subtotal').addEventListener('input', function() {
+            const subtotal = parseFloat(this.value) || 0;
+            const tax = Math.round(subtotal * 0.05);
+            const total = subtotal + tax;
+
+            document.getElementById('taxDisplay').textContent = 'NT$ ' + tax.toLocaleString();
+            document.getElementById('totalDisplay').textContent = 'NT$ ' + Math.round(total).toLocaleString();
+        });
+
+        // 監聽總計金額變化（從總計計算小計）
+        document.getElementById('totalInput').addEventListener('input', function() {
+            const total = parseFloat(this.value) || 0;
+            const subtotal = Math.round(total / 1.05);
+            const tax = total - subtotal;
+
+            document.getElementById('taxDisplay').textContent = 'NT$ ' + Math.round(tax).toLocaleString();
+            document.getElementById('subtotalDisplay').textContent = 'NT$ ' + subtotal.toLocaleString();
+        });
+
+        // 表單提交
+        document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const mode = document.getElementById('calculationMode').value;
+            let subtotal, tax, total;
+
+            if (mode === 'subtotal') {
+                // 從小計計算
+                subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
+                tax = Math.round(subtotal * 0.05);
+                total = Math.round(subtotal + tax);
+            } else {
+                // 從總計計算
+                total = parseFloat(document.getElementById('totalInput').value) || 0;
+                subtotal = Math.round(total / 1.05);
+                tax = total - subtotal;
+            }
+
+            const clientNameValue = document.getElementById('clientName').value.trim();
+            if (!clientNameValue) {
+                showToast('請選擇客戶或輸入新客戶名稱', 'error');
+                return;
+            }
+
+            const invoiceData = {
+                id: generateId(),
+                invoiceNumber: document.getElementById('invoiceNumber').value.trim(),
+                invoiceDate: document.getElementById('invoiceDate').value,
+                clientName: clientNameValue,
+                taxId: document.getElementById('taxId').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                projectName: document.getElementById('projectName').value.trim(),
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
+                status: document.getElementById('status').value
+            };
+
+            // 驗證必填項
+            const requiredFields = ['invoiceNumber', 'invoiceDate', 'clientName', 'projectName'];
+            const missing = validateRequired(invoiceData, requiredFields);
+
+            if (missing.length > 0) {
+                showToast('請填寫所有必填項目', 'error');
+                return;
+            }
+
+            if (subtotal <= 0 || total <= 0) {
+                showToast('金額必須大於 0', 'error');
+                return;
+            }
+
+            showLoading('儲存發票中...');
+            try {
+                await apiRequest('createInvoice', invoiceData);
+                
+                // 如果是新客戶，同時儲存客戶資訊
+                const clientSelect = document.getElementById('clientSelect');
+                if (!clientSelect.value && clientNameValue) {
+                    const clientData = {
+                        id: generateId(),
+                        name: clientNameValue,
+                        taxId: document.getElementById('taxId').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        address: document.getElementById('address').value.trim()
+                    };
+                    
+                    try {
+                        await apiRequest('createClient', clientData);
+                    } catch (error) {
+                        console.error('儲存客戶失敗:', error);
+                    }
+                }
+                
+                hideLoading();
+                showToast('發票建立成功！', 'success');
+                setTimeout(() => {
+                    window.location.href = 'invoices.html';
+                }, 1000);
+            } catch (error) {
+                hideLoading();
+                showToast('儲存失敗: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

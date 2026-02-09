@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>發票管理 - 發票與記帳管理系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #0891b2;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--text-gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-dark);
+        }
+
+        .filter-section {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .filter-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: border-color 0.3s;
+            height: 40px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .invoices-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        thead th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        tbody td {
+            padding: 16px;
+            font-size: 0.9rem;
+        }
+
+        .status-select {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .status-select:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .status-select.status-unpaid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-select.status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-select.status-void {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            margin-right: 10px;
+        }
+
+        .action-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .delete-btn {
+            color: var(--danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            padding: 0;
+        }
+
+        .delete-btn:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        /* 分頁樣式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-dark);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin: 0 10px;
+        }
+
+        /* =========================
+           響應式設計 (RWD)
+           ========================= */
+
+        /* 平板 (< 1024px) */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .filter-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-form button {
+                grid-column: span 1;
+            }
+        }
+
+        /* 手機橫向 (< 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filter-section {
+                padding: 20px;
+            }
+
+            .filter-title {
+                font-size: 1rem;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-form button {
+                grid-column: 1;
+            }
+
+            /* 表格改為卡片式佈局 */
+            .invoices-table {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 12px 8px;
+            }
+
+            /* 操作按鈕 */
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            /* 狀態下拉選單 */
+            .status-select {
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+
+            /* 分頁控制 */
+            .pagination {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .pagination button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .pagination-info {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* 手機直向 (< 576px) */
+        @media (max-width: 576px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .filter-section {
+                padding: 16px;
+            }
+
+            .filter-title {
+                font-size: 0.95rem;
+                margin-bottom: 12px;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 0.9rem;
+                padding: 4px 12px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            /* 表格滾動提示 */
+            .invoices-table::after {
+                content: '← 左右滑動查看更多 →';
+                display: block;
+                text-align: center;
+                font-size: 0.75rem;
+                color: var(--text-gray);
+                padding: 8px;
+                background: var(--bg-light);
+                border-radius: 0 0 12px 12px;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 10px 6px;
+            }
+
+            .action-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+
+            .status-select {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+                max-width: 85px;
+            }
+
+            .pagination {
+                padding: 12px;
+            }
+
+            .pagination button {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .pagination-info {
+                font-size: 0.8rem;
+                width: 100%;
+                text-align: center;
+                order: -1;
+                margin-bottom: 8px;
+            }
+        }
+
+        /* 極小螢幕 (< 375px) */
+        @media (max-width: 375px) {
+            body {
+                padding: 10px 8px;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .filter-section {
+                padding: 12px;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+
+            .action-btn {
+                padding: 4px 6px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 發票管理</h1>
+            <div class="header-actions">
+                <a href="invoice-create.html" class="btn btn-primary">➕ 新增發票</a>
+                <a href="index.html" class="btn btn-secondary">返回首頁</a>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">🔍 篩選條件</div>
+            <form id="filterForm" class="filter-form">
+                <div class="form-group">
+                    <label>開始日期</label>
+                    <input type="date" id="startDate" name="startDate">
+                </div>
+                <div class="form-group">
+                    <label>結束日期</label>
+                    <input type="date" id="endDate" name="endDate">
+                </div>
+                <div class="form-group">
+                    <label>客戶名稱</label>
+                    <input type="text" id="clientName" name="clientName" placeholder="輸入客戶名稱">
+                </div>
+                <div class="form-group">
+                    <label>狀態</label>
+                    <select id="statusFilter" name="statusFilter">
+                        <option value="">全部</option>
+                        <option value="未結清">未結清</option>
+                        <option value="已結清">已結清</option>
+                        <option value="作廢">作廢</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">查詢</button>
+                <button type="button" class="btn btn-secondary" id="resetBtn">重置</button>
+            </form>
+        </div>
+
+        <div class="invoices-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>發票號碼</th>
+                        <th>發票日期</th>
+                        <th>客戶名稱</th>
+                        <th>工程名稱</th>
+                        <th>小計</th>
+                        <th>稅金</th>
+                        <th>總計</th>
+                        <th>狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="invoicesBody">
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <h3>尚無發票記錄</h3>
+                            <p>點擊「新增發票」按鈕開始建立您的第一張發票</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分頁控制 -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prevBtn" onclick="changePage(-1)">« 上一頁</button>
+            <span class="page-info">第 <span id="currentPage">1</span> 頁，共 <span id="totalPages">1</span> 頁</span>
+            <button id="nextBtn" onclick="changePage(1)">下一頁 »</button>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        let allInvoices = [];
+        let filteredInvoices = [];
+        const ITEMS_PER_PAGE = 15;
+        let currentPage = 1;
+
+        // 頁面載入時獲取所有發票
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadInvoices();
+        });
+
+        // 載入發票列表
+        async function loadInvoices() {
+            showLoading('載入發票資料中...');
+            try {
+                allInvoices = await apiRequest('getInvoices');
+                filteredInvoices = allInvoices;
+                currentPage = 1;
+                displayInvoices();
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showToast('載入發票失敗: ' + error.message, 'error');
+            }
+        }
+
+        // 顯示發票列表（含分頁）
+        function displayInvoices() {
+            const tbody = document.getElementById('invoicesBody');
+            const paginationDiv = document.getElementById('pagination');
+            
+            if (!filteredInvoices || filteredInvoices.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <h3>尚無發票記錄</h3>
+                            <p>點擊「新增發票」按鈕開始建立您的第一張發票</p>
+                        </td>
+                    </tr>
+                `;
+                paginationDiv.style.display = 'none';
+                return;
+            }
+
+            // 排序：最新日期在最上方，日期相同時發票號碼大的在上
+            const sortedInvoices = [...filteredInvoices].sort((a, b) => {
+                const dateA = new Date(a.invoiceDate);
+                const dateB = new Date(b.invoiceDate);
+                
+                // 先比較日期
+                if (dateB.getTime() !== dateA.getTime()) {
+                    return dateB - dateA;
+                }
+                
+                // 日期相同時，比較發票號碼（提取數字部分進行比較）
+                const numA = parseInt(a.invoiceNumber.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.invoiceNumber.replace(/\D/g, '')) || 0;
+                
+                if (numA !== numB) {
+                    return numB - numA; // 數字大的在上面
+                }
+                
+                // 如果數字部分相同，則按字串比較
+                return b.invoiceNumber.localeCompare(a.invoiceNumber);
+            });
+
+            // 計算分頁
+            const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const pageInvoices = sortedInvoices.slice(startIndex, endIndex);
+
+            tbody.innerHTML = pageInvoices.map(invoice => {
+                const statusClass = 
+                    invoice.status === '已結清' ? 'status-paid' :
+                    invoice.status === '作廢' ? 'status-void' : 'status-unpaid';
+                
+                return `
+                    <tr>
+                        <td>${invoice.invoiceNumber}</td>
+                        <td>${invoice.invoiceDate}</td>
+                        <td>${invoice.clientName}</td>
+                        <td>${invoice.projectName}</td>
+                        <td>${formatCurrency(invoice.subtotal)}</td>
+                        <td>${formatCurrency(invoice.tax)}</td>
+                        <td>${formatCurrency(invoice.total)}</td>
+                        <td>
+                            <select class="status-select ${statusClass}" 
+                                    data-invoice-id="${invoice.id}" 
+                                    onchange="updateInvoiceStatus('${invoice.id}', this.value)">
+                                <option value="未結清" ${invoice.status === '未結清' || !invoice.status ? 'selected' : ''}>未結清</option>
+                                <option value="已結清" ${invoice.status === '已結清' ? 'selected' : ''}>已結清</option>
+                                <option value="作廢" ${invoice.status === '作廢' ? 'selected' : ''}>作廢</option>
+                            </select>
+                        </td>
+                        <td>
+                            <a href="invoice-edit.html?id=${invoice.id}" class="action-link">編輯</a>
+                            <button class="delete-btn" onclick="deleteInvoice('${invoice.id}', event)">刪除</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // 更新分頁控制
+            if (totalPages > 1) {
+                paginationDiv.style.display = 'flex';
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('totalPages').textContent = totalPages;
+                document.getElementById('prevBtn').disabled = currentPage === 1;
+                document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            } else {
+                paginationDiv.style.display = 'none';
+            }
+        }
+
+        // 換頁
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayInvoices();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 篩選表單提交
+        document.getElementById('filterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const clientName = document.getElementById('clientName').value.trim().toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredInvoices = allInvoices.filter(invoice => {
+                // 日期篩選
+                if (startDate || endDate) {
+                    const invoiceDate = new Date(invoice.invoiceDate);
+                    
+                    if (startDate && endDate) {
+                        if (invoiceDate < new Date(startDate) || invoiceDate > new Date(endDate)) {
+                            return false;
+                        }
+                    } else if (startDate) {
+                        if (invoiceDate < new Date(startDate)) return false;
+                    } else if (endDate) {
+                        if (invoiceDate > new Date(endDate)) return false;
+                    }
+                }
+
+                // 客戶名稱篩選
+                if (clientName && !invoice.clientName.toLowerCase().includes(clientName)) {
+                    return false;
+                }
+
+                // 狀態篩選
+                if (statusFilter && (invoice.status || '未結清') !== statusFilter) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            currentPage = 1;
+            displayInvoices();
+            showToast(`已篩選出 ${filteredInvoices.length} 筆發票`, 'info');
+        });
+
+        // 重置按鈕
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            document.getElementById('filterForm').reset();
+            filteredInvoices = allInvoices;
+            currentPage = 1;
+            displayInvoices();
+            showToast('已重置篩選條件', 'info');
+        });
+
+        // 刪除發票
+        async function deleteInvoice(invoiceId, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            if (!showConfirm('確定要刪除這張發票嗎？此操作無法復原。')) {
+                return;
+            }
+
+            showLoading('刪除發票中...');
+            try {
+                await apiRequest('deleteInvoice', { id: invoiceId });
+                
+                allInvoices = allInvoices.filter(inv => inv.id !== invoiceId);
+                filteredInvoices = filteredInvoices.filter(inv => inv.id !== invoiceId);
+                
+                // 調整當前頁碼
+                const totalPages = Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                }
+                
+                hideLoading();
+                showToast('發票已刪除', 'success');
+                displayInvoices();
+            } catch (error) {
+                hideLoading();
+                showToast('刪除失敗: ' + error.message, 'error');
+            }
+        }
+
+        // 更新發票狀態
+        async function updateInvoiceStatus(invoiceId, newStatus) {
+            showLoading('更新狀態中...');
+            try {
+                const invoice = allInvoices.find(inv => inv.id === invoiceId);
+                if (!invoice) {
+                    throw new Error('找不到發票');
+                }
+
+                const updatedInvoice = {
+                    ...invoice,
+                    status: newStatus
+                };
+
+                await apiRequest('updateInvoice', updatedInvoice);
+                
+                // 更新本地數據
+                const index = allInvoices.findIndex(inv => inv.id === invoiceId);
+                if (index !== -1) {
+                    allInvoices[index].status = newStatus;
+                }
+
+                const filteredIndex = filteredInvoices.findIndex(inv => inv.id === invoiceId);
+                if (filteredIndex !== -1) {
+                    filteredInvoices[filteredIndex].status = newStatus;
+                }
+
+                hideLoading();
+                showToast('狀態更新成功！', 'success');
+                
+                // 更新下拉選單樣式
+                const select = document.querySelector(`select[data-invoice-id="${invoiceId}"]`);
+                if (select) {
+                    select.className = 'status-select ' + 
+                        (newStatus === '已結清' ? 'status-paid' :
+                         newStatus === '作廢' ? 'status-void' : 'status-unpaid');
+                }
+            } catch (error) {
+                hideLoading();
+                showToast('更新失敗: ' + error.message, 'error');
+                await loadInvoices();
+            }
+        }
+    </script>
+</body>
+</html>
